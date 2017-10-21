@@ -61,6 +61,7 @@ namespace htb
         cell atom(const std::string& token);
         cell read_from(std::list<std::string>& tokens);
         cell read(const std::string& s);
+        std::string normalize_path(const std::string& path);
 
     }  // namespace internal
 

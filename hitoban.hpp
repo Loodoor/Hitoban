@@ -16,6 +16,7 @@
 
 namespace htb
 {
+    extern std::vector<std::string> loaded_files;
 
     void add_globals(environment& env);
     environment init_environment();

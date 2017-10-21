@@ -12,6 +12,8 @@
 namespace htb
 {
 
+    extern std::vector<std::string> loaded_files;
+
     namespace internal
     {
 
@@ -140,6 +142,8 @@ namespace htb
 
             std::string _filename = to_string(name, true);
             std::string _fullname = get_fullpath(name.val, baseenv);
+
+            loaded_files.push_back(normalize_path(_fullname));
 
             if (ns == 0)
             {
@@ -297,6 +301,14 @@ namespace htb
         {
             std::list<std::string> tokens(tokenize(s));
             return read_from(tokens);
+        }
+
+        std::string normalize_path(const std::string& path)
+        {
+            std::string o = path;
+            std::regex pattern("\\.\\./");
+            o = std::regex_replace(o, pattern, "");
+            return o;
         }
 
     }  // namespace internal

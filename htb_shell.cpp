@@ -15,7 +15,7 @@ namespace htb
     // the default read-eval-print-loop
     void repl(const std::string& prompt, environment* env)
     {
-        for (;;)
+        while (true)
         {
             std::cout << prompt;
             std::string line;

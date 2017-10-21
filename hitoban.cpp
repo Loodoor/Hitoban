@@ -14,6 +14,7 @@ namespace htb
 
     static bool strict_mode = false;
     static bool tracking_mode = false;
+    std::vector<std::string> loaded_files;
 
     // define functions to create and modify an Hitoban environment
     void add_globals(environment& env)
@@ -155,19 +156,28 @@ namespace htb
                 {
                     for (cellit i = c.list.begin(); i != c.list.end(); i++)
                     {
-                        HTB_HANDLE_EXCEPTION(internal::read_htb_file((*i), env))
+                        if (std::find(loaded_files.begin(), loaded_files.end(), i->val) == loaded_files.end())
+                        {
+                            HTB_HANDLE_EXCEPTION(internal::read_htb_file((*i), env))
+                        }
                     }
                 }
                 else if (c.type == String)
                 {
-                    HTB_HANDLE_EXCEPTION(internal::read_htb_file(c, env))
+                    if (std::find(loaded_files.begin(), loaded_files.end(), c.val) == loaded_files.end())
+                    {
+                        HTB_HANDLE_EXCEPTION(internal::read_htb_file(c, env))
+                    }
                 }
                 else if (c.type == Dict)
                 {
                     for (auto kv: c.dict)
                     {
                         environment* sub = env->get_namespace(kv.first);
-                        HTB_HANDLE_EXCEPTION(internal::read_htb_file(kv.second, env, sub))
+                        if (std::find(loaded_files.begin(), loaded_files.end(), kv.second.val) == loaded_files.end())
+                        {
+                            HTB_HANDLE_EXCEPTION(internal::read_htb_file(kv.second, env, sub))
+                        }
                     }
                 }
                 else
