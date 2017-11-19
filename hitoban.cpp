@@ -227,7 +227,7 @@ namespace htb
             // more symbols defined in that environment.
             try
             {
-                //                  body                                           params              args
+                //          body                          params             args
                 return eval(proc.list[2], new environment(proc.list[1].list, exps, proc.env));
             }
             catch (const std::runtime_error& e)
