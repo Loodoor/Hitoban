@@ -1,12 +1,4 @@
-(def fibo (lambda (x)
-    (if
-        (<= x 2) ; condition
-        1        ; then
-        (+                  ; add fibo(x-1) and fibo(x-2)
-            (fibo (- x 1))
-            (fibo (- x 2))
-        )  ; end of addition
-    ) ; end of if
-    ) ; end of lambda
-) ; end of definition
-(fibo 20) ; => 6795
+(begin
+    (def fibo (lambda (x) (if (<= x 2) 1 (+ (fibo (- x 1)) (fibo (- x 2)) ) ) ) )
+    (fibo 20)
+    )

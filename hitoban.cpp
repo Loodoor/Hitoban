@@ -352,15 +352,15 @@ int main(int argc, char *argv[])
         if (input == "-b")  // benchmark
         {
             benchmarking = true;
-            ++c;
+            input = argv[++c];
         }
 
         // if we are here, we have a filename passed as an argument
         if (htb::internal::check_if_file_exists(input))
         {
-            auto start = std::chrono::system_clock::now();
+            auto start = std::chrono::steady_clock::now();
             std::string content = htb::internal::read_file(input);
-            auto reading_time = std::chrono::system_clock::now();
+            auto reading_time = std::chrono::steady_clock::now();
 
             // setting up environment
             htb::environment global_env;
@@ -369,7 +369,7 @@ int main(int argc, char *argv[])
             global_env.isfile = true;
             global_env.fname = input;
 
-            auto env_init_time = std::chrono::system_clock::now();
+            auto env_init_time = std::chrono::steady_clock::now();
 
             // checking for arguments
             if (argc >= c + 2)
@@ -387,26 +387,26 @@ int main(int argc, char *argv[])
                 htb::run_string(args, &global_env);
             }
 
-            auto argc_construction_time = std::chrono::system_clock::now();
+            auto argc_construction_time = std::chrono::steady_clock::now();
 
             // running the code
             std::cout << htb::to_string(htb::run_string(content, &global_env)) << std::endl;
 
-            auto final_time = std::chrono::system_clock::now();
+            auto final_time = std::chrono::steady_clock::now();
 
             if (benchmarking)
             {
-                auto e01 = reading_time - start;
-                auto e12 = env_init_time - reading_time;
-                auto e23 = argc_construction_time - env_init_time;
-                auto e34 = final_time - argc_construction_time;
-                auto total_time = final_time - reading_time;
+                double e01 = std::chrono::duration_cast<std::chrono::duration<double>>(reading_time - start).count();
+                double e12 = std::chrono::duration_cast<std::chrono::duration<double>>(env_init_time - reading_time).count();
+                double e23 = std::chrono::duration_cast<std::chrono::duration<double>>(argc_construction_time - env_init_time).count();
+                double e34 = std::chrono::duration_cast<std::chrono::duration<double>>(final_time - argc_construction_time).count();
+                double total_time = std::chrono::duration_cast<std::chrono::duration<double>>(final_time - start).count();
 
-                std::cout << "Script reading (tokenizing and parsing) : " << e01.count() << std::endl
-                          << "Initializing environment : " << e12.count() << std::endl
-                          << "Sending command line arguments : " << e23.count() << std::endl
-                          << "Execution time : " << e34.count() << std::endl
-                          << "Total time : " << total_time.count() << std::endl
+                std::cout << "Tokenizing/parsing       : " << e01 << "s" << std::endl
+                          << "Initializing environment : " << e12 << "s" << std::endl
+                          << "Command line arguments   : " << e23 << "s" << std::endl
+                          << "Execution time           : " << e34 << "s" << std::endl
+                          << "Total time               : " << total_time << "s" << std::endl
                           ;
             }
         }
