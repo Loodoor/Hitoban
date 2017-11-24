@@ -1,0 +1,6 @@
+
+
+MACRO_TEST machin 5 10
+
+(print (isdef machin))
+(print machin)

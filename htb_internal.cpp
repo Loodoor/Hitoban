@@ -234,12 +234,128 @@ namespace htb
             throw std::runtime_error("Tokenizing failed");
         }
 
+/*
+        // reading a list of macros and putting them into the code
+        void tokenize_macros_and_insert(std::vector<std::string> macros, std::string& s)
+        {
+            std::vector<std::vector<std::string>> tokenized_macros;
+            std::vector<std::string> v_cur;
+            // splitting macros into sub lists
+            for (std::size_t i=0; i < macros.size(); ++i)
+            {
+                if (macros[i] == "#def")
+                {
+                    if (i != 0)
+                        tokenized_macros.push_back(v_cur);
+                    v_cur.clear();
+                }
+                else
+                    v_cur.push_back(macros[i]);
+            }
+
+            // iterating through the available macros and doing stuff
+            for (std::size_t i=0; i < tokenized_macros.size(); ++i)
+            {
+                // NAME [ARGS...] : CODE
+                if (tokenized_macros[i].size() > 2)
+                {
+                    std::string name = pop(&tokenized_macros[i], 0);
+                    // searching for the ':'
+                    std::size_t delim_index;
+                    for (delim_index=0; tokenized_macros[i][delim_index] != ":" && delim_index < tokenized_macros[i].size(); ++delim_index);
+                    if (delim_index == tokenized_macros[i].size() - 1 && tokenized_macros[i][delim_index] != ":")
+                        std::cout << "Bad macro definition for `" << name << "`" << std::endl;
+                    else
+                    {
+                        // we need to search for all the occurrences of name [args...] and replace it with
+                        // CODE.replace(ARGS..., args...)
+                        std::string _s = "";
+                        for (std::size_t j=0; j < delim_index; ++j)
+                            _s += ".+ ";
+                        // creating the search macro
+                        std::regex find_and_replace_macro(name + _s);
+                        // replacing occurrences in the code
+                        std::smatch m;
+                        while (std::regex_search(s, m, find_and_replace_macro))
+                        {
+                            std::string m0(m[0]);
+                            std::vector<std::string> pieces = split_string(m0, " ");
+                            pop(&pieces, 0); // throw the name, we just need the arguments
+                            if (pieces.size() == delim_index)
+                            {
+                                // replacing arguments name in the macro code by their values
+                                std::string _code = "";
+                                for (std::size_t k=delim_index + 1; k < tokenized_macros[i].size(); ++k)
+                                    _code += tokenized_macros[i][k];
+                                for (std::size_t k=0; k < tokenized_macros[i].size() - delim_index; ++k)
+                                {
+                                    // we are putting the arguments given to the macro into a temp copy of the macro code
+                                    std::smatch m;
+                                    std::regex reg(tokenized_macros[i][k]);
+                                    if (std::regex_search(_code, m, reg))
+                                        _code = std::regex_replace(_code, reg, pieces[k]);
+                                    else
+                                        std::cout << "Bad macro conception. Can not find your mom in it" << std::endl;
+                                }
+                                s = std::regex_replace(s, find_and_replace_macro, _code, std::regex_constants::format_first_only);
+                            }
+                            else
+                                std::cout << "Bad macro call, this one (" << name << ") seems to need " << delim_index << " arguments, not " << pieces.size() << std::endl;
+                        }
+                    }
+                }
+                else
+                    std::cout << "Bad macro definition, expecting at least 3 elements : `NAME [ARGS...] : CODE`" << std::endl;
+            }
+        }
+*/
+
         // convert given string to list of tokens
         std::list<std::string> tokenize(const std::string& str)
         {
             std::string s = str;
             std::list<std::string> tokens;
 
+/*
+            // getting macros
+std::cout << "hi" << std::endl;
+            std::regex reg_macro("\\#def");
+            std::smatch m;
+            std::vector<std::string> macros;
+std::cout << "hello" << std::endl;
+            while (std::regex_match(s, m, reg_macro))
+            {
+                macros.push_back(std::string("#def"));
+std::cout << "friend" << std::endl;
+                s = std::regex_replace(s, reg_macro, std::string(""), std::regex_constants::format_first_only);
+                bool ok = false;
+
+                for (const auto& r : regexs)
+                {
+                    std::smatch m;
+                    bool found = std::regex_search(s, m, r);
+                    if (found)
+                    {
+                        std::string m0(m[0]);
+std::cout << m0 << " ";
+                        // stripping blanks characters between instructions, and comments
+                        if (std::string::npos != m0.find_first_not_of(" \t\v\r\n") && m0.substr(0, 1) != ";")
+                            macros.push_back(m[0]);
+                        s = std::regex_replace(s, r, std::string(""), std::regex_constants::format_first_only);
+                        ok = true;
+                        break;
+                    }
+                }
+                if (!ok)
+                {
+                    raise_tokenizing_error(str, s);
+                    break;
+                }
+            }
+            tokenize_macros_and_insert(macros, s);
+*/
+
+            // getting all the code and tokenizing it
             while (!s.empty())
             {
                 bool ok = false;
@@ -247,7 +363,8 @@ namespace htb
                 for (const auto& r : regexs)
                 {
                     std::smatch m;
-                    if (std::regex_search(s, m, r))
+                    bool found = std::regex_search(s, m, r);
+                    if (found)
                     {
                         std::string m0(m[0]);
                         // stripping blanks characters between instructions, and comments

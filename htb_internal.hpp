@@ -38,6 +38,25 @@ namespace htb
             return t;
         }
 
+        template<typename T>
+        T pop(std::vector<T>* obj, unsigned int i)
+        {
+            T element {};
+
+            if (0 <= i && i < obj->size())
+            {
+                element = (*obj)[i];
+                obj->erase(obj->begin() + i);
+            }
+            else if (i < 0 && (-i) < obj->size())
+            {
+                element = (*obj)[obj->size() + i];
+                obj->erase(obj->begin() + obj->size() + i);
+            }
+
+            return element;
+        }
+
         std::vector<std::string> split_string(const std::string& str, const std::string& delimiter);
 
         // related to the eval loop
@@ -56,6 +75,7 @@ namespace htb
         cell read_htb_file(cell name, environment* baseenv, environment* ns=0);
         std::string load_htb_file(const std::string& name, environment* baseenv);
 
+        void tokenize_macros_and_insert(std::vector<std::string> macros, std::string& s);
         void raise_tokenizing_error(const std::string& str, const std::string& s);
         std::list<std::string> tokenize(const std::string& str);
         cell atom(const std::string& token);
