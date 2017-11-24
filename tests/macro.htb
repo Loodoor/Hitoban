@@ -1,6 +1,12 @@
-
-
-MACRO_TEST machin 5 10
-
-(print (isdef machin))
-(print machin)
+(def fibo (lambda (x)
+    (if
+        (<= x 2) ; condition
+        1        ; then
+        (+                  ; add fibo(x-1) and fibo(x-2)
+            (fibo (- x 1))
+            (fibo (- x 2))
+        )  ; end of addition
+    ) ; end of if
+    ) ; end of lambda
+) ; end of definition
+(fibo 20) ; => 6795

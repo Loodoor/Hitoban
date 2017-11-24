@@ -303,6 +303,7 @@ int main(int argc, char *argv[])
     {
         int c = 1;
         std::string input = argv[c];
+        bool benchmarking = false;
 
         if (input == "-h")  // help
         {
@@ -313,6 +314,7 @@ int main(int argc, char *argv[])
                             << "-w      : stop execution if an exception is detected" << std::endl
                             << "-t      : print all the details of the execution" << std::endl
                             << "-v      : print the Hitoban version number and exit" << std::endl
+                            << "-b      : start a benchmark (need a script !)" << std::endl
                             << "file    : program read from script file" << std::endl
                             << "args... : arguments passed to program in ARGS" << std::endl
                             ;
@@ -347,11 +349,18 @@ int main(int argc, char *argv[])
             htb::print_shell_headers();
             return EXITSUCCESS;
         }
+        if (input == "-b")  // benchmark
+        {
+            benchmarking = true;
+            ++c;
+        }
 
         // if we are here, we have a filename passed as an argument
         if (htb::internal::check_if_file_exists(input))
         {
+            auto start = std::chrono::system_clock::now();
             std::string content = htb::internal::read_file(input);
+            auto reading_time = std::chrono::system_clock::now();
 
             // setting up environment
             htb::environment global_env;
@@ -359,6 +368,8 @@ int main(int argc, char *argv[])
             // we must save that we are in a file !
             global_env.isfile = true;
             global_env.fname = input;
+
+            auto env_init_time = std::chrono::system_clock::now();
 
             // checking for arguments
             if (argc >= c + 2)
@@ -376,8 +387,28 @@ int main(int argc, char *argv[])
                 htb::run_string(args, &global_env);
             }
 
+            auto argc_construction_time = std::chrono::system_clock::now();
+
             // running the code
             std::cout << htb::to_string(htb::run_string(content, &global_env)) << std::endl;
+
+            auto final_time = std::chrono::system_clock::now();
+
+            if (benchmarking)
+            {
+                auto e01 = reading_time - start;
+                auto e12 = env_init_time - reading_time;
+                auto e23 = argc_construction_time - env_init_time;
+                auto e34 = final_time - argc_construction_time;
+                auto total_time = final_time - reading_time;
+
+                std::cout << "Script reading (tokenizing and parsing) : " << e01.count() << std::endl
+                          << "Initializing environment : " << e12.count() << std::endl
+                          << "Sending command line arguments : " << e23.count() << std::endl
+                          << "Execution time : " << e34.count() << std::endl
+                          << "Total time : " << total_time.count() << std::endl
+                          ;
+            }
         }
         else
         {
