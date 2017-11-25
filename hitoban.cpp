@@ -42,7 +42,7 @@ namespace htb
         if (tracking_mode)
         {
             std::string nx = to_string(x);
-            std::cout << log(termcolor::cyan, "x: " << nx) << " "
+            std::cout << log(termcolor::cyan, "x (" << internal::convert_htbtype(x.type) << ") : " << nx) << " "
                                 << log(termcolor::yellow, "[" << ((!env->has_outer()) ? "global": "ref on global")) << ", "
                                     << log(termcolor::green, ((env->isfile) ? (std::string("is a file `") + env->fname +"`") : "not a file"))
                                 << log(termcolor::yellow, "]")

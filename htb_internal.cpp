@@ -71,6 +71,8 @@ namespace htb
                 out = "Lambda";
             else if (type == Exception)
                 out = "Exception";
+            else
+                out = "???";
 
             return out;
         }
@@ -412,7 +414,7 @@ std::cout << m0 << " ";
         cell atom(const std::string& token)
         {
             if (isdig(token[0]) || (token[0] == '-' && isdig(token[1])))
-                return cell(Number, token);
+                return cell(Number, str_to<long>(token));
             if (token.substr(0, 1) == "\"" || token.substr(0, 1) == "'")
                 return cell(String, token.substr(1, token.size() - 2));
             return cell(Symbol, token);
@@ -427,7 +429,7 @@ std::cout << m0 << " ";
             {
                 cell c(List);
                 while (tokens.front() != ")")
-                    c.list.push_back(read_from(tokens));
+                    c.val.get_ref<cells>().push_back(read_from(tokens));
                 tokens.pop_front();
 
                 return c;
@@ -495,7 +497,11 @@ std::cout << m0 << " ";
             return "\"" + exp.val.get<std::string>() + "\"";
         else if (exp.type == String && from_htb)
             return exp.val.get<std::string>();
-        return "object @ " + internal::str(reinterpret_cast<std::size_t>(&exp.val));
+        else if (exp.type == Number)
+            return internal::str(exp.val.get<long>());
+        else if (exp.type == Symbol)
+            return exp.val.get<std::string>();
+        return "<" + internal::convert_htbtype(exp.type) + " @ " + internal::str(reinterpret_cast<std::size_t>(&exp)) + ">";
     }
 
 }  // namespace htb

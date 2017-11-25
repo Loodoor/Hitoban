@@ -46,13 +46,9 @@
 #define HTB_HANDLE_EXCEPTION(c) { if (c.type == Exception) return c; }
 
 #define HTB_COPY(base, dest) cell dest(base.type); \
-        if (dest.type == List)  dest.list = base.list; \
-        else if (dest.type == Dict)  dest.dict = base.dict; \
-        else if (dest.type == Proc) dest.proc = base.proc; \
-        else  dest.val = base.val; \
+        dest.val = base.val; \
         dest.env = base.env; \
-        dest.const_expr = base.const_expr; \
-        dest.number_of_args = base.number_of_args;
+        dest.const_expr = base.const_expr;
 
 #define HTB_FILE_NOT_FOUND std::string("<file not found>")
 

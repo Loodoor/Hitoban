@@ -56,11 +56,14 @@ namespace htb
 
         value val;
         cell_type type;
+
         environment* env;
         bool const_expr;
 
         cell(cell_type type=Symbol);
-        template <typename T> cell(cell_type type, T) :type(type), env(0), const_expr(false) {}
+
+        template <typename T>
+        cell(cell_type type, T) :type(type), env(0), const_expr(false){}
 
         cell(proc_type proc, long n=0);
         cell(const cell& c);
