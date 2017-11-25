@@ -234,6 +234,28 @@ namespace htb
             throw std::runtime_error("Tokenizing failed");
         }
 
+        void check_integrity_of(std::list<std::string>& tokens)
+        {
+            long lparen_count = 0, rparen_count = 0;
+            for (std::list<std::string>::iterator it=tokens.begin(); it != tokens.end(); ++it)
+            {
+                if ((*it) == "(")
+                    ++lparen_count;
+                if ((*it) == ")")
+                    ++rparen_count;
+            }
+
+            if (lparen_count > rparen_count)
+            {
+                std::string msg = "Missing " + str(lparen_count - rparen_count) + " closing brace" + (lparen_count - rparen_count == 1 ? "" : "s");
+                throw std::runtime_error(msg);
+            }
+            else if (rparen_count > lparen_count)
+            {
+                std::string msg = "Missing " + str(rparen_count - lparen_count) + " opening brace" + (rparen_count - lparen_count == 1 ? "" : "s");
+                throw std::runtime_error(msg);
+            }
+        }
 /*
         // reading a list of macros and putting them into the code
         void tokenize_macros_and_insert(std::vector<std::string> macros, std::string& s)
@@ -381,6 +403,7 @@ std::cout << m0 << " ";
                     break;
                 }
             }
+            check_integrity_of(tokens);
 
             return tokens;
         }

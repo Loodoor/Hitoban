@@ -76,6 +76,7 @@ namespace htb
         std::string load_htb_file(const std::string& name, environment* baseenv);
 
         void tokenize_macros_and_insert(std::vector<std::string> macros, std::string& s);
+        void check_integrity_of(std::list<std::string>& tokens);
         void raise_tokenizing_error(const std::string& str, const std::string& s);
         std::list<std::string> tokenize(const std::string& str);
         cell atom(const std::string& token);

@@ -254,8 +254,15 @@ namespace htb
     // execute a string of Hitoban code, in a given environment
     cell run_string(const std::string& code, environment* env)
     {
-        cell result = eval(internal::read(code), env);
-        return result;
+        try
+        {
+            cell result = eval(internal::read(code), env);
+            return result;
+        }
+        catch (const std::runtime_error& e)
+        {
+            HTB_RAISE(e.what())
+        }
     }
 
     cell create_function(proc_type p, long n)

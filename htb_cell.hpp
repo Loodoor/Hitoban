@@ -29,17 +29,61 @@ namespace htb
     typedef std::vector<cell> cells;
     typedef cells::const_iterator cellit;
 
+    // htb value holder #optimization
+    struct _value {
+        std::string symbol_or_str;
+        long number;
+        cells lst;
+        std::map<std::string, cell> dict;
+        proc_type proc;
+        // cell_type type;
+
+        template <typename T>
+        T get()
+        {
+            if (typeid(T) == typeid(std::string))
+                return symbol_or_str;
+            if (typeid(T) == typeid(long))
+                return number;
+            if (typeid(T) == typeid(cells))
+                return lst;
+            if (typeid(T) == typeid(std::map<std::string, cell>))
+                return dict;
+            if (typeid(T) == typeid(proc_type))
+                return proc;
+        }
+
+        template <typename T>
+        void set(T value)
+        {
+            if (typeid(T) == typeid(std::string))
+                symbol_or_str = value;
+            if (typeid(T) == typeid(long))
+                number = value;
+            if (typeid(T) == typeid(cells))
+                lst = value;
+            if (typeid(T) == typeid(std::map<std::string, cell>))
+                dict = value;
+            if (typeid(T) == typeid(proc_type))
+                proc = value;
+        }
+    };
+
     // a variant that can hold any kind of Hitoban value
     struct cell
     {
         typedef std::vector<cell>::const_iterator iter;
         typedef std::map<std::string, cell> map;
 
+        /// to be replaced
         cell_type type;
         std::string val;
         std::vector<cell> list;
         map dict;
         proc_type proc;
+        /// NEW ONE :
+        _value x;
+
         environment* env;
         bool const_expr;
         long number_of_args;
@@ -95,7 +139,12 @@ namespace htb
         {
             // first check len of args
             //                          >= 0 means it's not a special code
-            HTB_RAISE_IF(number_of_args >= 0 && long(c.size()) != number_of_args, "'" << name << "' needs " << number_of_args << " argument(s) not " << c.size())
+            HTB_RAISE_IF(number_of_args >= 0 && long(c.size()) != number_of_args,
+                         "'" << name << "' needs " << (number_of_args == AT_LEAST_1_ARGS ? "at least one" :
+                                                       (number_of_args == AT_LEAST_2_ARGS ? "at least two" :
+                                                        (number_of_args == BETWEEN_0_1_ARGS ? "between 0 and 1" :
+                                                         (number_of_args == BETWEEN_0_2_ARGS ? "between 0 and 2" :
+                                                          number_of_args)))) << " argument(s) not " << c.size())
             HTB_RAISE_IF(number_of_args == AT_LEAST_1_ARGS && long(c.size()) < 1, "'" << name << "' needs at least 1 argument not " << c.size())
             HTB_RAISE_IF(number_of_args == AT_LEAST_2_ARGS && long(c.size()) < 2, "'" << name << "' needs at least 2 arguments not " << c.size())
             HTB_RAISE_IF(number_of_args == BETWEEN_0_1_ARGS && long(c.size()) > 1, "'" << name << "' needs 0 to 1 argument, not " << c.size())
