@@ -43,6 +43,7 @@
 #define HTB_RAISE(msg) {std::stringstream ss; ss << msg; return cell(Exception, ss.str());}
 #define HTB_RAISE_IF(cd, msg) if (cd) { HTB_RAISE(msg) }
 #define HTB_HANDLE_EXCEPTION(c) { if (c.type == Exception) return c; }
+
 #define HTB_COPY(base, dest) cell dest(base.type); \
         if (dest.type == List)  dest.list = base.list; \
         else if (dest.type == Dict)  dest.dict = base.dict; \

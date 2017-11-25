@@ -12,54 +12,50 @@ namespace htb
 
     cell proc_add(const cells& c)
     {
-        long n = internal::str_to<long>(c[0].val);
+        long n = c[0].val.get<long>();
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
-            HTB_RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            n += internal::str_to<long>(i->val);
+            HTB_RAISE_IF(i->type != Number, "Not a number : " << to_string(*i))
+            n += i->val.get<long>();
         }
-
         return cell(Number, n);
     }
 
     cell proc_sub(const cells& c)
     {
-        long n = internal::str_to<long>(c[0].val);
+        long n = c[0].val.get<long>();
         if (c.size() > 1)
         {
             for (cellit i = c.begin()+1; i != c.end(); ++i)
             {
-                HTB_RAISE_IF(i->type != Number, "Not a number : " << i->val)
-                n -= internal::str_to<long>(i->val);
+                HTB_RAISE_IF(i->type != Number, "Not a number : " << to_string(*i))
+                n -= i->val.get<long>();
             }
         }
         else
             n = -n;
-
         return cell(Number, n);
     }
 
     cell proc_mul(const cells& c)
     {
-        long n(1);
+        long n = 1;
         for (cellit i = c.begin(); i != c.end(); ++i)
         {
-            HTB_RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            n *= internal::str_to<long>(i->val);
+            HTB_RAISE_IF(i->type != Number, "Not a number : " << to_string(*i))
+            n *= i->val.get<long>();
         }
-
         return cell(Number, n);
     }
 
     cell proc_div(const cells& c)
     {
-        long n = internal::str_to<long>(c[0].val);
+        long n = c[0].val.get<long>();
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
-            HTB_RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            n /= internal::str_to<long>(i->val);
+            HTB_RAISE_IF(i->type != Number, "Not a number : " << to_string(*i))
+            n /= i->val.get<long>();
         }
-
         return cell(Number, n);
     }
 
@@ -69,13 +65,13 @@ namespace htb
         {
             if (i->val == false_sym.val)
                 return false_sym;
-            if (i->type == Number && i->val == "0")
+            if (i->type == Number && i->val.get<long>() == 0)
                 return false_sym;
-            if (i->type == String && i->val.size() == 0)
+            if (i->type == String && i->val.get_ref<std::string>().size() == 0)
                 return false_sym;
-            if (i->type == List && i->list.size() == 0)
+            if (i->type == List && i->val.get_ref<cells>().size() == 0)
                 return false_sym;
-            if (i->type == Dict && i->dict.size() == 0)
+            if (i->type == Dict && i->val.get_ref<cell_dict>().size() == 0)
                 return false_sym;
         }
         return true_sym;
@@ -87,13 +83,13 @@ namespace htb
         {
             if (i->val == true_sym.val)
                 return true_sym;
-            if (i->type == Number && i->val != "0")
+            if (i->type == Number && i->val.get<long>() != 0)
                 return true_sym;
-            if (i->type == String && i->val.size() > 0)
+            if (i->type == String && i->val.get_ref<std::string>().size() > 0)
                 return true_sym;
-            if (i->type == List && i->list.size() > 0)
+            if (i->type == List && i->val.get_ref<cells>().size() > 0)
                 return true_sym;
-            if (i->type == Dict && i->dict.size() > 0)
+            if (i->type == Dict && i->val.get_ref<cell_dict>().size() > 0)
                 return true_sym;
         }
         return false_sym;
@@ -101,21 +97,21 @@ namespace htb
 
     cell proc_pow(const cells& c)
     {
-        return cell(Number, std::pow(internal::str_to<long>(c[0].val), internal::str_to<long>(c[1].val)));
+        return cell(Number, std::pow(c[0].val.get<long>(), c[1].val.get<long>()));
     }
 
     cell proc_modulo(const cells& c)
     {
-        return cell(Number, internal::str_to<long>(c[0].val) % internal::str_to<long>(c[1].val));
+        return cell(Number, c[0].val.get<long>() % c[1].val.get<long>());
     }
 
     cell proc_greater(const cells& c)
     {
-        long n = internal::str_to<long>(c[0].val);
+        long n = c[0].val.get<long>();
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
-            HTB_RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            if (n <= internal::str_to<long>(i->val))
+            HTB_RAISE_IF(i->type != Number, "Not a number : " << to_string(*i))
+            if (n <= i->val.get<long>())
                 return false_sym;
         }
         return true_sym;
@@ -123,11 +119,11 @@ namespace htb
 
     cell proc_great_equal(const cells& c)
     {
-        long n = internal::str_to<long>(c[0].val);
+        long n = c[0].val.get<long>();
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
-            HTB_RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            if (n < internal::str_to<long>(i->val))
+            HTB_RAISE_IF(i->type != Number, "Not a number : " << to_string(*i))
+            if (n < i->val.get<long>())
                 return false_sym;
         }
         return true_sym;
@@ -135,11 +131,11 @@ namespace htb
 
     cell proc_less(const cells& c)
     {
-        long n = internal::str_to<long>(c[0].val);
+        long n = c[0].val.get<long>();
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
-            HTB_RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            if (n >= internal::str_to<long>(i->val))
+            HTB_RAISE_IF(i->type != Number, "Not a number : " << to_string(*i))
+            if (n >= i->val.get<long>())
                 return false_sym;
         }
         return true_sym;
@@ -147,11 +143,11 @@ namespace htb
 
     cell proc_less_equal(const cells& c)
     {
-        long n = internal::str_to<long>(c[0].val);
+        long n = c[0].val.get<long>();
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
-            HTB_RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            if (n > internal::str_to<long>(i->val))
+            HTB_RAISE_IF(i->type != Number, "Not a number : " << to_string(*i))
+            if (n > i->val.get<long>())
                 return false_sym;
         }
         return true_sym;
@@ -159,11 +155,11 @@ namespace htb
 
     cell proc_eq(const cells& c)
     {
-        long n = internal::str_to<long>(c[0].val);
+        long n = c[0].val.get<long>();
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
-            HTB_RAISE_IF(i->type != Number, "Not a number : " << i->val)
-            long b = internal::str_to<long>(i->val);
+            HTB_RAISE_IF(i->type != Number, "Not a number : " << to_string(*i))
+            long b = i->val.get<long>();
             if (n < b || n > b)
                 return false_sym;
         }
@@ -173,49 +169,49 @@ namespace htb
     cell proc_cond(const cells& c)
     {
         cell result(Symbol);
-
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
-            if (i->list[0].val == nil.val)
+            if (i->val.get_ref<cells>()[0].val == nil.val)
             {
-                cell r(i->list[1]);
+                cell r(i->val.get<cells>()[1]);
                 return r;
             }
-            if (i->list[0].val == true_sym.val)
+            if (i->val.get_ref<cells>()[0].val == true_sym.val)
             {
-                cell r(i->list[1]);
+                cell r(i->val.get<cells>()[1]);
                 return r;
             }
         }
-
         return nil;
     }
 
     cell proc_length(const cells& c)
     {
         if (c[0].type == String)
-            return cell(Number, c[0].val.size());
-        return cell(Number, c[0].list.size());
+            return cell(Number, c[0].val.get_ref<std::string>().size());
+        else if (c[0].type == Dict)
+            return cell(Number, c[0].val.get_ref<cell_dict>().size());
+        return cell(Number, c[0].val.get_ref<cells>().size());
     }
 
     cell proc_nullp(const cells& c)
     {
-        return c[0].list.empty() ? true_sym : false_sym;
+        return c[0].val.get_ref<cells>().empty() ? true_sym : false_sym;
     }
 
     cell proc_car(const cells& c)
     {
-        HTB_RAISE_IF(c[0].list.empty(), "List empty")
-        return c[0].list[0];
+        HTB_RAISE_IF(c[0].val.get_ref<cells>().empty(), "Empty list")
+        return c[0].val.get_ref<cells>()[0];
     }
 
     cell proc_cdr(const cells& c)
     {
-        if (c[0].list.size() < 2)
+        if (c[0].val.get_ref<cells>().size() < 2)
             return nil;
 
         cell result(c[0]);
-        result.list.erase(result.list.begin());
+        result.val.get_ref<cells>().erase(result.val.get_ref<cells>().begin());
 
         return result;
     }
@@ -223,33 +219,31 @@ namespace htb
     cell proc_append(const cells& c)
     {
         cell result(List);
-        result.list = c[0].list;
-        for (cellit i = c[1].list.begin(); i != c[1].list.end(); ++i)
+        result.val.set<cells>(c[0].val.get<cells>());
+        for (cellit i = c[1].val.get_ref<cells>().begin(); i != c[1].val.get_ref<cells>().end(); ++i)
         {
             HTB_HANDLE_EXCEPTION((*i))
-            result.list.push_back(*i);
+            result.val.get_ref<cells>().push_back(*i);
         }
-
         return result;
     }
 
     cell proc_cons(const cells& c)
     {
         cell result(List);
-        result.list.push_back(c[0]);
-        for (cellit i = c[1].list.begin(); i != c[1].list.end(); ++i)
+        result.val.get_ref<cells>().push_back(c[0]);
+        for (cellit i = c[1].val.get_ref<cells>().begin(); i != c[1].val.get_ref<cells>().end(); ++i)
         {
             HTB_HANDLE_EXCEPTION((*i))
-            result.list.push_back(*i);
+            result.val.get_ref<cells>().push_back(*i);
         }
-
         return result;
     }
 
     cell proc_list(const cells& c)
     {
         cell result(List);
-        result.list = c;
+        result.val.set<cells>(c);
 
         return result;
     }
@@ -258,7 +252,7 @@ namespace htb
     {
         if (c[1].type == List)
         {
-            long n = internal::str_to<long>(c[0].val);
+            long n = c[0].val.get<long>();
             cell temp(c[1]);
             HTB_COPY(temp.get_in(n), r)
             return r;
@@ -267,14 +261,14 @@ namespace htb
         {
             HTB_RAISE_IF(c[0].type != String, "Keys in dict are of type string, not of type " << internal::convert_htbtype(c[0].type))
             cell temp(c[1]);
-            HTB_COPY(temp.get_in(c[0].val), r)
+            HTB_COPY(temp.get_in(c[0].val.get_ref<std::string>()), r)
             return r;
         }
         else if (c[1].type == String)
         {
-            long n = internal::str_to<long>(c[0].val);
-            HTB_RAISE_IF(n >= long(c[1].val.size()), "'nth' can not get a character at pos " << n << " because it is outside the string")
-            return cell(String, std::string(1, c[1].val[n]));
+            long n = c[0].val.get<long>();
+            HTB_RAISE_IF(n >= long(c[1].val.get_ref<std::string>().size()), "'nth' can not get a character at pos " << n << " because it is outside the string")
+            return cell(String, std::string(1, c[1].val.get_ref<std::string>()[n]));
         }
         // we should not be there
         HTB_RAISE("The object should be of type list, dict or string, not of type " << internal::convert_htbtype(c[1].type))
@@ -283,18 +277,16 @@ namespace htb
     cell proc_dict(const cells& c)
     {
         cell result(Dict);
-
         for (cellit i = c.begin(); i != c.end(); ++i)
         {
             HTB_RAISE_IF(i->type != List, "Arguments of 'dict' should be of type list, not of type " << internal::convert_htbtype(i->type))
-            HTB_HANDLE_EXCEPTION(i->list[0])
-            HTB_RAISE_IF(i->list[0].type != String, "Keys for 'dict' should only be of type string, not of type " << internal::convert_htbtype(i->list[0].type))
-            std::string key(i->list[0].val);
-            HTB_RAISE_IF(i->list.size() > 2,"Lists to define (key value) in dict should not be of size " << i->list.size())  // we have more than 2 elements, not normal
-            cell v(i->list[1]);
+            HTB_HANDLE_EXCEPTION(i->val.get_ref<cells>()[0])
+            HTB_RAISE_IF(i->val.get_ref<cells>()[0].type != String, "Keys for 'dict' should only be of type string, not of type " << internal::convert_htbtype(i->val.get_ref<cells>()[0].type))
+            std::string key(i->val.get_ref<cells>()[0].val.get_ref<std::string>());
+            HTB_RAISE_IF(i->val.get_ref<cells>().size() > 2,"Lists to define (key value) in dict should not be of size " << i->val.get_ref<cells>().size())  // we have more than 2 elements, not normal
+            cell v(i->val.get<cells>()[1]);
             result.dict[key] = v;
         }
-
         return result;
     }
 
@@ -306,11 +298,9 @@ namespace htb
         for (auto kv: c[0].dict)
         {
             cell k(String);
-            k.val = kv.first;
-
-            result.list.push_back(k);
+            k.val.set<std::string>(kv.first);
+            result.val.get_ref<cells>().push_back(k);
         }
-
         return result;
     }
 
@@ -322,9 +312,8 @@ namespace htb
         for (auto kv: c[0].dict)
         {
             cell v(kv.second);
-            result.list.push_back(v);
+            result.val.get_ref<cells>().push_back(v);
         }
-
         return result;
     }
 
@@ -341,14 +330,14 @@ namespace htb
     cell proc_prin1(const cells& c)
     {
         HTB_RAISE_IF(c[0].type != String, "'prin1' argument's should be of type string, not of type " << internal::convert_htbtype(c[0].type))
-        std::cout << c[0].val;
+        std::cout << to_string(c[0].val);
         return nil;
     }
 
     cell proc_input(const cells& c)
     {
         if (c.size() == 1)
-            std::cout << c[0].val;
+            std::cout << to_string(c[0].val);
         std::string o;
         std::cin >> o;
         return cell(String, o);
@@ -364,17 +353,17 @@ namespace htb
     cell proc_system(const cells& c)
     {
         HTB_RAISE_IF(c[0].type != String, "'system' argument's should of type string, not of type " << internal::convert_htbtype(c[0].type))
-        return cell(Number, system(c[0].val.c_str()));
+        return cell(Number, system(c[0].val.get_ref<std::string>().c_str()));
     }
 
     cell proc_str_eq(const cells& c)
     {
         HTB_RAISE_IF(c[0].type != String, "'str-eq' arguments' should be of type string, not of type " << internal::convert_htbtype(c[0].type))
-        std::string f = c[0].val;
+        std::string f = c[0].val.get_ref<std::string>();
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
             HTB_RAISE_IF(i->type != String, "'str-eq' arguments' should be of type string, not of type " << internal::convert_htbtype(i->type))
-            if (i->val != f)
+            if (i->val.get_ref<std::string>() != f)
                 return false_sym;
         }
         return true_sym;
@@ -383,11 +372,11 @@ namespace htb
     cell proc_str_cat(const cells& c)
     {
         HTB_RAISE_IF(c[0].type != String, "'str-cat' arguments' should be of type string, not of type " << internal::convert_htbtype(c[0].type))
-        std::string f = c[0].val;
+        std::string f = c[0].val.get<std::string>();
         for (cellit i = c.begin()+1; i != c.end(); ++i)
         {
             HTB_RAISE_IF(i->type != String, "'str-cat' arguments' should be of type string, not of type " << internal::convert_htbtype(i->type))
-            f += i->val;
+            f += i->val.get<std::string>();
         }
         return cell(String, f);
     }
@@ -395,7 +384,7 @@ namespace htb
     cell proc_str_reverse(const cells& c)
     {
         HTB_RAISE_IF(c[0].type != String, "'str-reverse' argument's should be of type string, not of type " << internal::convert_htbtype(c[0].type))
-        std::string s = c[0].val;
+        std::string s = c[0].val.get<std::string>();
         std::reverse(s.begin(), s.end());
         return cell(String, s);
     }
@@ -407,15 +396,15 @@ namespace htb
 
         try
         {
-            rj::format f(c[0].val);
+            rj::format f(c[0].val.get<std::string>());
             for (cellit i = c.begin()+1; i != c.end(); ++i)
             {
                 HTB_RAISE_IF(i->type != String && i->type != Number,
-                         "'str-format' arguments' should be of type string, not of type " << internal::convert_htbtype(i->type))
+                         "'str-format' arguments' should be of type string or number, not of type " << internal::convert_htbtype(i->type))
                 if (i->type == Number)
-                    f.args(internal::str_to<long>(i->val));
+                    f.args(i->val.get<long>());
                 else
-                    f.args(i->val);
+                    f.args(i->val.get_ref<std::string>());
             }
             std::string msg = f;
             return cell(String, msg);
@@ -424,7 +413,6 @@ namespace htb
         {
             HTB_RAISE(e.what())
         }
-
         // we should never be there, because we either return something in the try or in the catch
         return nil;
     }
@@ -446,14 +434,14 @@ namespace htb
         else if (c.size() == 1)
         {
             HTB_RAISE_IF(c[0].type != Number, "'random' arguments' should be of type number, not of type " << internal::convert_htbtype(c[0].type))
-            std::uniform_int_distribution<> d(0, internal::str_to<long>(c[0].val));
+            std::uniform_int_distribution<> d(0, c[0].val.get<long>());
             n = d(gen);
         }
         else
         {
             HTB_RAISE_IF(c[0].type != Number, "'random' arguments' should be of type number, not of type " << internal::convert_htbtype(c[0].type))
             HTB_RAISE_IF(c[1].type != Number, "'random' arguments' should be of type number, not of type " << internal::convert_htbtype(c[1].type))
-            std::uniform_int_distribution<> d(internal::str_to<long>(c[0].val), internal::str_to<long>(c[1].val));
+            std::uniform_int_distribution<> d(c[0].val.get<long>(), c[1].val.get<long>());
             n = d(gen);
         }
         return cell(Number, n);

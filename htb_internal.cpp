@@ -137,11 +137,11 @@ namespace htb
         cell read_htb_file(cell name, environment* baseenv, environment* ns)
         {
             HTB_RAISE_IF(name.type != String, "'require' needs strings, not " << convert_htbtype(name.type))
-            std::string content = load_htb_file(name.val.get<std::string>(), baseenv);
-            HTB_RAISE_IF(content == HTB_FILE_NOT_FOUND, "Can not find the required file '" << name.val.get<std::string>() << "'")
+            std::string content = load_htb_file(name.val.get_ref<std::string>(), baseenv);
+            HTB_RAISE_IF(content == HTB_FILE_NOT_FOUND, "Can not find the required file '" << name.val.get_ref<std::string>() << "'")
 
             std::string _filename = to_string(name, true);
-            std::string _fullname = get_fullpath(name.val.get<std::string>(), baseenv);
+            std::string _fullname = get_fullpath(name.val.get_ref<std::string>(), baseenv);
 
             loaded_files.push_back(normalize_path(_fullname));
 
@@ -478,11 +478,11 @@ std::cout << m0 << " ";
             return "<Exception> " + exp.val.get<std::string>();
         else if (exp.type == Dict)
         {
-            if (exp.val.get<map>().empty())
+            if (exp.val.get<cell_dict>().empty())
                 return "<Dict>";
 
             std::string s("(");
-            for (auto& kv: exp.val.get<map>())
+            for (auto& kv: exp.val.get<cell_dict>())
             {
                 s += ':' + kv.first + ' ';
                 s += to_string(kv.second) + ' ';

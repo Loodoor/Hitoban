@@ -27,3 +27,5 @@ namespace htb
     cell create_function(proc_type p, long n=INF_NB_ARGS);
 
 }  // namespace htb
+
+int start_repl(bool benchmarking=false);

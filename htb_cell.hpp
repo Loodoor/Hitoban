@@ -27,82 +27,124 @@ namespace htb
 
     typedef cell (*proc_type)(const std::vector<cell>&);
     typedef std::vector<cell> cells;
+    typedef std::map<std::string, cell> cell_dict;
     typedef cells::const_iterator cellit;
-
-    // htb value holder #optimization
-    struct value {
-        std::string symbol_or_str;
-        long number;
-        cells list;
-        std::map<std::string, cell> dict;
-        proc_type proc;
-
-        long number_of_args;
-
-        value() :
-            symbol_or_str("")
-            , number(0)
-            //, list()
-            //, dict()
-            , proc(nullptr)
-            , number_of_args(0)
-        {}
-
-        value(const value& v) :
-            symbol_or_str(v.symbol_or_str)
-            , number(v.number)
-            , list(v.list)
-            , dict(v.dict)
-            , proc(v.proc)
-            , number_of_args(v.number_of_args)
-        {}
-
-        void init_from(value* v)
-        {
-            symbol_or_str = v->symbol_or_str;
-            number = v->number;
-            list = v->list;
-            dict = v->dict;
-            proc = v->proc;
-            number_of_args = v->number_of_args;
-        }
-
-        template <typename T>
-        T get()
-        {
-            if (typeid(T) == typeid(std::string))
-                return symbol_or_str;
-            if (typeid(T) == typeid(long))
-                return number;
-            if (typeid(T) == typeid(cells))
-                return list;
-            if (typeid(T) == typeid(std::map<std::string, cell>))
-                return dict;
-            if (typeid(T) == typeid(proc_type))
-                return proc;
-        }
-
-        template <typename T>
-        void set(T value)
-        {
-            if (typeid(T) == typeid(std::string))
-                symbol_or_str = value;
-            if (typeid(T) == typeid(long))
-                number = value;
-            if (typeid(T) == typeid(cells))
-                list = value;
-            if (typeid(T) == typeid(std::map<std::string, cell>))
-                dict = value;
-            if (typeid(T) == typeid(proc_type))
-                proc = value;
-        }
-    };
+    typedef cell return_type;
+    typedef const cells& args_type;
 
     // a variant that can hold any kind of Hitoban value
     struct cell
     {
         typedef std::vector<cell>::const_iterator iter;
-        typedef std::map<std::string, cell> map;
+
+        // htb value holder #optimization
+        struct value {
+            std::string symbol_or_str;
+            long number;
+            cells lst;
+            cell_dict dict;
+            proc_type proc;
+
+            long number_of_args;
+
+            value() :
+                symbol_or_str("")
+                , number(0)
+                //, lst()
+                //, dict()
+                , proc(nullptr)
+                , number_of_args(0)
+            {}
+
+            value(const value& v) :
+                symbol_or_str(v.symbol_or_str)
+                , number(v.number)
+                , lst(v.lst)
+                , dict(v.dict)
+                , proc(v.proc)
+                , number_of_args(v.number_of_args)
+            {}
+
+            void init_from(value* v)
+            {
+                symbol_or_str = v->symbol_or_str;
+                number = v->number;
+                lst = v->lst;
+                dict = v->dict;
+                proc = v->proc;
+                number_of_args = v->number_of_args;
+            }
+
+            template <typename T>
+            T get()
+            {
+                if (typeid(T) == typeid(std::string))
+                    return symbol_or_str;
+                if (typeid(T) == typeid(long))
+                    return number;
+                if (typeid(T) == typeid(cells))
+                    return lst;
+                if (typeid(T) == typeid(cell_dict))
+                    return dict;
+                if (typeid(T) == typeid(proc_type))
+                    return proc;
+            }
+
+            template <typename T>
+            T get() const
+            {
+                if (typeid(T) == typeid(std::string))
+                    return symbol_or_str;
+                if (typeid(T) == typeid(long))
+                    return number;
+                if (typeid(T) == typeid(cells))
+                    return lst;
+                if (typeid(T) == typeid(cell_dict))
+                    return dict;
+                if (typeid(T) == typeid(proc_type))
+                    return proc;
+            }
+
+            template <typename T>
+            T& get_ref()
+            {
+                if (typeid(T) == typeid(std::string))
+                    return symbol_or_str;
+                if (typeid(T) == typeid(long))
+                    return number;
+                if (typeid(T) == typeid(cells))
+                    return lst;
+                if (typeid(T) == typeid(cell_dict))
+                    return dict;
+                if (typeid(T) == typeid(proc_type))
+                    return proc;
+            }
+
+            template <typename T>
+            void set(const T v)
+            {
+                if (typeid(T) == typeid(std::string))
+                    symbol_or_str = v;
+                if (typeid(T) == typeid(long))
+                    number = v;
+                if (typeid(T) == typeid(cells))
+                    lst = v;
+                if (typeid(T) == typeid(cell_dict))
+                    dict = v;
+                if (typeid(T) == typeid(proc_type))
+                    proc = v;
+            }
+
+            bool operator==(const value& other)
+            {
+                return (symbol_or_str == other.symbol_or_str) &&
+                       (number == other.number) &&
+                       (lst == other.lst) &&
+                       (dict == other.dict) &&
+                       (&proc == &other.proc) &&
+                       (number_of_args == other.number_of_args);
+            }
+        };
 
         value val;
         cell_type type;
@@ -129,9 +171,9 @@ namespace htb
             type(Proc)
             , env(0)
             , const_expr(false)
-            , val.number_of_args(n)
         {
             val.set<proc_type>(proc);
+            val.number_of_args = n;
         }
 
         cell(const cell& c) :
@@ -158,7 +200,7 @@ namespace htb
                                                        (val.number_of_args == AT_LEAST_2_ARGS ? "at least two" :
                                                         (val.number_of_args == BETWEEN_0_1_ARGS ? "between 0 and 1" :
                                                          (val.number_of_args == BETWEEN_0_2_ARGS ? "between 0 and 2" :
-                                                          val.number_of_args)))) << " argument(s) not " << c.size())
+                                                          internal::str(val.number_of_args))))) << " argument(s) not " << c.size())
             HTB_RAISE_IF(val.number_of_args == AT_LEAST_1_ARGS && long(c.size()) < 1, "'" << name << "' needs at least 1 argument not " << c.size())
             HTB_RAISE_IF(val.number_of_args == AT_LEAST_2_ARGS && long(c.size()) < 2, "'" << name << "' needs at least 2 arguments not " << c.size())
             HTB_RAISE_IF(val.number_of_args == BETWEEN_0_1_ARGS && long(c.size()) > 1, "'" << name << "' needs 0 to 1 argument, not " << c.size())
@@ -179,9 +221,9 @@ namespace htb
         cell get_in(long n)
         {
             HTB_RAISE_IF(type != List, "Can not access a sub element because the object is not a list")
-            HTB_RAISE_IF(n >= long(val.list.size()), "Can not find the " << n << "th element in the list")
+            HTB_RAISE_IF(n >= long(val.lst.size()), "Can not find the " << n << "th element in the list")
 
-            return val.list[n];
+            return val.lst[n];
         }
 
         bool operator==(const cell& r) const
@@ -204,9 +246,6 @@ namespace htb
     // a dictionary that (a) associates symbols with cells, and
     // (b) can chain to an "outer" dictionary
     struct environment {
-        // map a variable name onto a cell
-        typedef std::map<std::string, cell> map;
-
         bool isfile;
         std::string fname;
 
@@ -232,7 +271,7 @@ namespace htb
         }
 
         // return a reference to the innermost environment where 'var' appears
-        map& find(const std::string& var)
+        cell_dict& find(const std::string& var)
         {
             if (env_.find(var) != env_.end())
                 return env_; // the symbol exists in this environment
@@ -314,17 +353,9 @@ namespace htb
 
     private:
         environment* outer_; // next adjacent outer env, or 0 if there are no further environments
-        map env_; // inner symbol->cell mapping
-        map errors;
+        cell_dict env_; // inner symbol->cell mapping
+        cell_dict errors;
         std::map<std::string, environment*> namespaces;
     };  // struct environment
-
-    namespace types
-    {
-
-        using ret = cell;
-        using args = const cells&;
-
-    }  // namespace types
 
 } // namespace htb
