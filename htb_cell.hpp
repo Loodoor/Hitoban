@@ -14,7 +14,7 @@
 namespace htb
 {
 
-    constexpr long INF_NB_ARGS  = -1;
+    constexpr long INF_NB_ARGS      = -1;
     constexpr long AT_LEAST_1_ARGS  = -2;
     constexpr long AT_LEAST_2_ARGS  = -3;
     constexpr long BETWEEN_0_1_ARGS = -4;
@@ -30,13 +30,42 @@ namespace htb
     typedef cells::const_iterator cellit;
 
     // htb value holder #optimization
-    struct _value {
+    struct value {
         std::string symbol_or_str;
         long number;
-        cells lst;
+        cells list;
         std::map<std::string, cell> dict;
         proc_type proc;
-        // cell_type type;
+
+        long number_of_args;
+
+        value() :
+            symbol_or_str("")
+            , number(0)
+            //, list()
+            //, dict()
+            , proc(nullptr)
+            , number_of_args(0)
+        {}
+
+        value(const value& v) :
+            symbol_or_str(v.symbol_or_str)
+            , number(v.number)
+            , list(v.list)
+            , dict(v.dict)
+            , proc(v.proc)
+            , number_of_args(v.number_of_args)
+        {}
+
+        void init_from(value* v)
+        {
+            symbol_or_str = v->symbol_or_str;
+            number = v->number;
+            list = v->list;
+            dict = v->dict;
+            proc = v->proc;
+            number_of_args = v->number_of_args;
+        }
 
         template <typename T>
         T get()
@@ -46,7 +75,7 @@ namespace htb
             if (typeid(T) == typeid(long))
                 return number;
             if (typeid(T) == typeid(cells))
-                return lst;
+                return list;
             if (typeid(T) == typeid(std::map<std::string, cell>))
                 return dict;
             if (typeid(T) == typeid(proc_type))
@@ -61,7 +90,7 @@ namespace htb
             if (typeid(T) == typeid(long))
                 number = value;
             if (typeid(T) == typeid(cells))
-                lst = value;
+                list = value;
             if (typeid(T) == typeid(std::map<std::string, cell>))
                 dict = value;
             if (typeid(T) == typeid(proc_type))
@@ -75,99 +104,84 @@ namespace htb
         typedef std::vector<cell>::const_iterator iter;
         typedef std::map<std::string, cell> map;
 
-        /// to be replaced
+        value val;
         cell_type type;
-        std::string val;
-        std::vector<cell> list;
-        map dict;
-        proc_type proc;
-        /// NEW ONE :
-        _value x;
 
         environment* env;
         bool const_expr;
-        long number_of_args;
 
         cell(cell_type type=Symbol) :
             type(type)
             , env(0)
             , const_expr(false)
-            , number_of_args(0)
         {}
 
         template <typename T>
-        cell(cell_type type, T val) :
+        cell(cell_type type, T v) :
             type(type)
-            , val(internal::str<T>(val))
             , env(0)
             , const_expr(false)
-            , number_of_args(0)
-        {}
+        {
+            val.set<T>(v);
+        }
 
         cell(proc_type proc, long n=0) :
             type(Proc)
-            , proc(proc)
             , env(0)
             , const_expr(false)
-            , number_of_args(n)
-        {}
+            , val.number_of_args(n)
+        {
+            val.set<proc_type>(proc);
+        }
 
         cell(const cell& c) :
-            type(c.type)
-            , val(c.val)
-            , list(c.list)
-            , dict(c.dict)
-            , proc(c.proc)
+            val(c.val)
+            , type(c.type)
             , env(c.env)
             , const_expr(c.const_expr)
-            , number_of_args(c.number_of_args)
         {}
 
         void init_from(cell* c)
         {
             type = c->type;
-            val = c->val;
-            list = c->list;
-            dict = c->dict;
-            proc = c->proc;
+            val.init_from(&(c->val));
             env = c->env;
             const_expr = c->const_expr;
-            number_of_args = c->number_of_args;
         }
 
         cell exec(const cells& c, const std::string& name)
         {
             // first check len of args
             //                          >= 0 means it's not a special code
-            HTB_RAISE_IF(number_of_args >= 0 && long(c.size()) != number_of_args,
-                         "'" << name << "' needs " << (number_of_args == AT_LEAST_1_ARGS ? "at least one" :
-                                                       (number_of_args == AT_LEAST_2_ARGS ? "at least two" :
-                                                        (number_of_args == BETWEEN_0_1_ARGS ? "between 0 and 1" :
-                                                         (number_of_args == BETWEEN_0_2_ARGS ? "between 0 and 2" :
-                                                          number_of_args)))) << " argument(s) not " << c.size())
-            HTB_RAISE_IF(number_of_args == AT_LEAST_1_ARGS && long(c.size()) < 1, "'" << name << "' needs at least 1 argument not " << c.size())
-            HTB_RAISE_IF(number_of_args == AT_LEAST_2_ARGS && long(c.size()) < 2, "'" << name << "' needs at least 2 arguments not " << c.size())
-            HTB_RAISE_IF(number_of_args == BETWEEN_0_1_ARGS && long(c.size()) > 1, "'" << name << "' needs 0 to 1 argument, not " << c.size())
-            HTB_RAISE_IF(number_of_args == BETWEEN_0_2_ARGS && long(c.size()) > 2, "'" << name << "' needs 0 to 2 arguments, not " << c.size())
+            HTB_RAISE_IF(val.number_of_args >= 0 && long(c.size()) != val.number_of_args,
+                         "'" << name << "' needs " << (val.number_of_args == AT_LEAST_1_ARGS ? "at least one" :
+                                                       (val.number_of_args == AT_LEAST_2_ARGS ? "at least two" :
+                                                        (val.number_of_args == BETWEEN_0_1_ARGS ? "between 0 and 1" :
+                                                         (val.number_of_args == BETWEEN_0_2_ARGS ? "between 0 and 2" :
+                                                          val.number_of_args)))) << " argument(s) not " << c.size())
+            HTB_RAISE_IF(val.number_of_args == AT_LEAST_1_ARGS && long(c.size()) < 1, "'" << name << "' needs at least 1 argument not " << c.size())
+            HTB_RAISE_IF(val.number_of_args == AT_LEAST_2_ARGS && long(c.size()) < 2, "'" << name << "' needs at least 2 arguments not " << c.size())
+            HTB_RAISE_IF(val.number_of_args == BETWEEN_0_1_ARGS && long(c.size()) > 1, "'" << name << "' needs 0 to 1 argument, not " << c.size())
+            HTB_RAISE_IF(val.number_of_args == BETWEEN_0_2_ARGS && long(c.size()) > 2, "'" << name << "' needs 0 to 2 arguments, not " << c.size())
             // finally exec the procedure
-            return proc(c);
+            return val.proc(c);
         }
 
         cell get_in(const std::string& key)
         {
             HTB_RAISE_IF(type != Dict, "Can not access a sub element because the object is not a dict")
-            HTB_RAISE_IF(dict.empty(), "Can not access an element with the key " << key << " because the dict is empty")
-            HTB_RAISE_IF(dict.find(key) == dict.end(), "Can not find the key " << key << " in the dict")
+            HTB_RAISE_IF(val.dict.empty(), "Can not access an element with the key " << key << " because the dict is empty")
+            HTB_RAISE_IF(val.dict.find(key) == val.dict.end(), "Can not find the key " << key << " in the dict")
 
-            return dict[key];
+            return val.dict[key];
         }
 
         cell get_in(long n)
         {
             HTB_RAISE_IF(type != List, "Can not access a sub element because the object is not a list")
-            HTB_RAISE_IF(n >= long(list.size()), "Can not find the " << n << "th element in the list")
+            HTB_RAISE_IF(n >= long(val.list.size()), "Can not find the " << n << "th element in the list")
 
-            return list[n];
+            return val.list[n];
         }
 
         bool operator==(const cell& r) const
@@ -213,7 +227,7 @@ namespace htb
             cellit a = args.begin();
             for (cellit p = parms.begin(); p != parms.end(); ++p)
             {
-                env_[p->val] = *a++;
+                env_[p->val.get<std::string>()] = *a++;
             }
         }
 

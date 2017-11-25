@@ -272,6 +272,8 @@ namespace htb
 
 } // namespace htb
 
+/// dirty trick to add a main only if we did not compiled with the tests
+#ifndef HTB_TESTS_INCLUDED
 htb::types::ret mon_test(htb::types::args args)
 {
     // checking the size of the arguments
@@ -285,7 +287,7 @@ htb::types::ret mon_test(htb::types::args args)
     return args[0];
 }
 
-int start_repl()
+int start_repl(bool benchmarking)
 {
     htb::print_shell_headers();
     std::cout << "Type \"help\" for more information."
@@ -293,15 +295,15 @@ int start_repl()
 
     htb::environment global_env;
     htb::add_globals(global_env);
-    // fct name in htb            ;  create the function  (ptr on fct, number of arguments)
+
+    /// fct name in htb        ;  create the function (ptr on fct, number of arguments)
     global_env["mon_test"] = htb::create_function(&mon_test, 1);
-    htb::repl("> ", &global_env);
+
+    htb::repl("> ", &global_env, benchmarking);
 
     return EXITSUCCESS;
 }
 
-#ifndef HTB_TESTS_INCLUDED
-// dirty trick to add a main only if we did not compiled with the tests
 int main(int argc, char *argv[])
 {
     if (argc < 2)  // we just started the program as a normal one, launch the read-eval-print-loop
@@ -318,14 +320,20 @@ int main(int argc, char *argv[])
                             << "Usage: " << argv[0] << " [option] ... [file | tests] [args...]" << std::endl
                             << "Options and arguments:" << std::endl
                             << "-h      : print this help message and exit" << std::endl
+                            << "-b      : start a benchmark. If no files are specified, " << std::endl
+                            << "          start a repl evaluating the time taken by each pieces of code" << std::endl
                             << "-w      : stop execution if an exception is detected" << std::endl
                             << "-t      : print all the details of the execution" << std::endl
                             << "-v      : print the Hitoban version number and exit" << std::endl
-                            << "-b      : start a benchmark (need a script !)" << std::endl
                             << "file    : program read from script file" << std::endl
                             << "args... : arguments passed to program in ARGS" << std::endl
                             ;
             return EXITSUCCESS;
+        }
+        if (input == "-b")  // benchmark
+        {
+            benchmarking = true;
+            input = argv[++c];
         }
         if (input == "-w")  // strict mode
         {
@@ -335,7 +343,7 @@ int main(int argc, char *argv[])
                 input = argv[++c];
             else
             {
-                start_repl();  // we do not have other arguments, start a repl
+                start_repl(benchmarking);  // we do not have other arguments, start a repl
                 return EXITSUCCESS;
             }
         }
@@ -347,7 +355,7 @@ int main(int argc, char *argv[])
                 input = argv[++c];
             else
             {
-                start_repl();  // we do not have other arguments, start a repl
+                start_repl(benchmarking);  // we do not have other arguments, start a repl
                 return EXITSUCCESS;
             }
         }
@@ -355,11 +363,6 @@ int main(int argc, char *argv[])
         {
             htb::print_shell_headers();
             return EXITSUCCESS;
-        }
-        if (input == "-b")  // benchmark
-        {
-            benchmarking = true;
-            input = argv[++c];
         }
 
         // if we are here, we have a filename passed as an argument
@@ -409,7 +412,9 @@ int main(int argc, char *argv[])
                 double e34 = std::chrono::duration_cast<std::chrono::duration<double>>(final_time - argc_construction_time).count();
                 double total_time = std::chrono::duration_cast<std::chrono::duration<double>>(final_time - start).count();
 
-                std::cout << "Tokenizing/parsing       : " << e01 << "s" << std::endl
+                std::cout << "Benchmark"                                 << std::endl
+                          << "================================"          << std::endl
+                          << "Tokenizing/parsing       : " << e01 << "s" << std::endl
                           << "Initializing environment : " << e12 << "s" << std::endl
                           << "Command line arguments   : " << e23 << "s" << std::endl
                           << "Execution time           : " << e34 << "s" << std::endl

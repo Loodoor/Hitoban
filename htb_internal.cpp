@@ -137,11 +137,11 @@ namespace htb
         cell read_htb_file(cell name, environment* baseenv, environment* ns)
         {
             HTB_RAISE_IF(name.type != String, "'require' needs strings, not " << convert_htbtype(name.type))
-            std::string content = load_htb_file(name.val, baseenv);
-            HTB_RAISE_IF(content == HTB_FILE_NOT_FOUND, "Can not find the required file '" << name.val << "'")
+            std::string content = load_htb_file(name.val.get<std::string>(), baseenv);
+            HTB_RAISE_IF(content == HTB_FILE_NOT_FOUND, "Can not find the required file '" << name.val.get<std::string>() << "'")
 
             std::string _filename = to_string(name, true);
-            std::string _fullname = get_fullpath(name.val, baseenv);
+            std::string _fullname = get_fullpath(name.val.get<std::string>(), baseenv);
 
             loaded_files.push_back(normalize_path(_fullname));
 
@@ -459,7 +459,7 @@ std::cout << m0 << " ";
         if (exp.type == List)
         {
             std::string s("(");
-            for (cell::iter e = exp.list.begin(); e != exp.list.end(); ++e)
+            for (cell::iter e = exp.val.get<cells>().begin(); e != exp.val.get<cells>().end(); ++e)
             {
                 if ((*e) != exp)
                     s += to_string(*e) + ' ';
@@ -475,14 +475,14 @@ std::cout << m0 << " ";
         else if (exp.type == Proc)
             return "<Proc>";
         else if (exp.type == Exception)
-            return "<Exception> " + exp.val;
+            return "<Exception> " + exp.val.get<std::string>();
         else if (exp.type == Dict)
         {
-            if (exp.dict.empty())
+            if (exp.val.get<map>().empty())
                 return "<Dict>";
 
             std::string s("(");
-            for (auto& kv: exp.dict)
+            for (auto& kv: exp.val.get<map>())
             {
                 s += ':' + kv.first + ' ';
                 s += to_string(kv.second) + ' ';
@@ -492,10 +492,10 @@ std::cout << m0 << " ";
             return s + ')';
         }
         else if (exp.type == String && !from_htb)
-            return "\"" + exp.val + "\"";
+            return "\"" + exp.val.get<std::string>() + "\"";
         else if (exp.type == String && from_htb)
-            return exp.val;
-        return exp.val;
+            return exp.val.get<std::string>();
+        return "object @ " + internal::str(reinterpret_cast<std::size_t>(&exp.val));
     }
 
 }  // namespace htb

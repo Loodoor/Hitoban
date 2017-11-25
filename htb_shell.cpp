@@ -13,7 +13,7 @@ namespace htb
 {
 
     // the default read-eval-print-loop
-    void repl(const std::string& prompt, environment* env)
+    void repl(const std::string& prompt, environment* env, bool benchmark)
     {
         while (true)
         {
@@ -47,7 +47,19 @@ namespace htb
                     std::cout << "Can not find LICENSE file. Please only download Hitoban from the official repository : https://github.com/Loodoor/Hitoban/releases" << std::endl;
             }
             else
+            {
+                auto start = std::chrono::steady_clock::now();
                 std::cout << to_string(run_string(line, env)) << std::endl;
+                if (benchmark)
+                {
+                    auto final_time = std::chrono::steady_clock::now();
+                    double total_time = std::chrono::duration_cast<std::chrono::duration<double>>(final_time - start).count();
+                    std::cout << std::endl
+                              << "Execution time : " << total_time << "s"
+                              << std::endl
+                              ;
+                }
+            }
         }
     }
 

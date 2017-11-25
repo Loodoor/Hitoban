@@ -22,7 +22,7 @@ namespace htb
     environment init_environment();
     cell eval(cell x, environment* env);
     cell run_string(const std::string& code, environment* env);
-    void repl(const std::string& prompt, environment* env);
+    void repl(const std::string& prompt, environment* env, bool benchmark=false);
     void print_shell_headers();
     cell create_function(proc_type p, long n=INF_NB_ARGS);
 
